@@ -13,8 +13,10 @@ function App() {
 
   // localStorageから読み込み
   useEffect(() => {
-    const saved = localStorage.getItem('todos');
-    if (saved) setTodos(JSON.parse(saved));
+    const savedTodos = localStorage.getItem('todos');
+    if (savedTodos) {
+      setTodos(JSON.parse(savedTodos));
+    }
   }, []);
 
   // localStorageに保存
@@ -23,7 +25,7 @@ function App() {
   }, [todos]);
 
   const addTodo = () => {
-    if (!input.trim()) return;
+    if (input.trim() === '') return;
 
     const newTodo: Todo = {
       id: Date.now(),
@@ -35,51 +37,53 @@ function App() {
     setInput('');
   };
 
-  const toggleTodo = (id: number) => {
-    setTodos(todos.map(todo =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    ));
+  const toggleComplete = (id: number) => {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+      )
+    );
   };
 
   const deleteTodo = (id: number) => {
-    setTodos(todos.filter(todo => todo.id !== id));
+    setTodos(todos.filter((todo) => todo.id !== id));
   };
 
   const clearCompleted = () => {
-    setTodos(todos.filter(todo => !todo.completed));
+    setTodos(todos.filter((todo) => !todo.completed));
   };
 
-  const filteredTodos = todos.filter(todo => {
+  const filteredTodos = todos.filter((todo) => {
     if (filter === 'active') return !todo.completed;
     if (filter === 'completed') return todo.completed;
     return true;
   });
 
-  const activeCount = todos.filter(t => !t.completed).length;
+  const remainingCount = todos.filter((todo) => !todo.completed).length;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-6 text-white">
       <div className="w-full max-w-md">
-        {/* Header */}
+        {/* ヘッダー */}
         <div className="flex items-center gap-4 mb-8">
           <div className="w-14 h-14 bg-emerald-600 rounded-3xl flex items-center justify-center">
-            <span className="text-3xl">📝</span>
+            <span className="text-4xl">✅</span>
           </div>
           <div>
-            <h1 className="text-5xl font-bold tracking-tighter">React Todo</h1>
-            <p className="text-emerald-400">TypeScript + Tailwind</p>
+            <h1 className="text-5xl font-bold tracking-tight">Todo</h1>
+            <p className="text-emerald-400">React + Tailwind</p>
           </div>
         </div>
 
-        {/* Input */}
+        {/* 入力欄 */}
         <div className="flex gap-3 mb-6">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addTodo()}
+            onKeyPress={(e) => e.key === 'Enter' && addTodo()}
             placeholder="新しいタスクを入力..."
-            className="flex-1 bg-zinc-900 border border-zinc-700 focus:border-emerald-500 px-5 py-4 rounded-3xl outline-none text-lg"
+            className="flex-1 bg-zinc-900 border border-zinc-700 focus:border-emerald-500 px-5 py-4 rounded-3xl text-lg outline-none"
           />
           <button
             onClick={addTodo}
@@ -89,7 +93,7 @@ function App() {
           </button>
         </div>
 
-        {/* Todo List */}
+        {/* Todoリスト */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
           {filteredTodos.length === 0 ? (
             <div className="p-12 text-center text-zinc-500">
@@ -99,17 +103,17 @@ function App() {
             filteredTodos.map((todo) => (
               <div
                 key={todo.id}
-                className="flex items-center px-6 py-4 border-b border-zinc-800 group hover:bg-zinc-800/50 transition-colors"
+                className="flex items-center px-6 py-4 border-b border-zinc-800 hover:bg-zinc-800/50 group transition-colors"
               >
                 <button
-                  onClick={() => toggleTodo(todo.id)}
-                  className={`w-7 h-7 rounded-2xl border-2 flex-shrink-0 mr-4 flex items-center justify-center transition-all ${
-                    todo.completed 
-                      ? 'bg-emerald-600 border-emerald-600' 
+                  onClick={() => toggleComplete(todo.id)}
+                  className={`w-7 h-7 rounded-2xl border-2 flex items-center justify-center mr-4 transition-all ${
+                    todo.completed
+                      ? 'bg-emerald-600 border-emerald-600'
                       : 'border-zinc-600 group-hover:border-emerald-500'
                   }`}
                 >
-                  {todo.completed && <span className="text-white text-sm">✓</span>}
+                  {todo.completed && <span className="text-white">✓</span>}
                 </button>
 
                 <span
@@ -129,24 +133,24 @@ function App() {
           )}
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-6 text-sm px-1">
+        {/* フッター */}
+        <div className="flex justify-between items-center mt-6 text-sm px-2">
           <div className="text-zinc-400">
-            {activeCount} 件のタスク
+            {remainingCount} 件のタスク
           </div>
 
           <div className="flex gap-1 bg-zinc-900 border border-zinc-800 rounded-2xl p-1">
-            {(['all', 'active', 'completed'] as const).map((f) => (
+            {(['all', 'active', 'completed'] as const).map((type) => (
               <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 rounded-xl text-sm transition-all ${
-                  filter === f 
-                    ? 'bg-emerald-600 text-white' 
+                key={type}
+                onClick={() => setFilter(type)}
+                className={`px-4 py-1.5 text-sm rounded-xl transition-all ${
+                  filter === type
+                    ? 'bg-emerald-600 text-white'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
-                {f === 'all' ? 'すべて' : f === 'active' ? '未完了' : '完了'}
+                {type === 'all' ? 'すべて' : type === 'active' ? '未完了' : '完了'}
               </button>
             ))}
           </div>
